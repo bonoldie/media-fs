@@ -4,11 +4,12 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class FileAccess
 {
     /**
-     * Handle an incoming request.
+     * Validate file access
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next
@@ -21,7 +22,11 @@ class FileAccess
         } else {
             $container_id = $request->get('container_id');
             
-            auth()->current_container = auth()->access->containers()->where('id','like',$container_id)->firstOrFail();
+            auth()->current_container = auth()->access->containers()->where('id','like',$container_id)->first();
+
+            if(empty(auth()->current_container)){
+                throw new NotFoundHttpException("Container not found.");
+            }
         }
 
         return $next($request);

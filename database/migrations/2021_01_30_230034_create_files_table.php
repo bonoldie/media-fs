@@ -20,7 +20,7 @@ class CreateFilesTable extends Migration
             $table->uuid('parent_file_id')->nullable();
             $table->enum('type',['file','folder'])->default('file');
             $table->string('name');
-            $table->string('ext');
+            $table->string('ext')->nullable();
             $table->boolean('deleted')->default(0);
 
             // Timestamps

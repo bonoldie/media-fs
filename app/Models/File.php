@@ -13,11 +13,13 @@ class File extends Model
 
     public $incrementing = false;
 
-    protected $fillable = ['name', 'ext', 'id', 'container_id'];
+    protected $appends = array('files_counter');
+
+    protected $fillable = ['name', 'ext', 'id', 'container_id', 'type', 'parent_file_id'];
 
     public function container($deleted = 0)
     {
-        return $this->belongsTo(Container::class, 'id', 'container_id')->where('deleted','=',$deleted);
+        return $this->belongsTo(Container::class, 'id', 'container_id')->where('deleted', '=', $deleted);
     }
 
     public function files()
@@ -27,6 +29,12 @@ class File extends Model
         return collect([]);
     }
 
+
+    public function getFilesCounterAttribute()
+    {
+        return $this->files()->count();
+    }
+    
     // Helpers
     public function isFile()
     {

@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class ContainerAccess
 {
     /**
-     * Handle an incoming request.
+     * Validate container access
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  \Closure  $next

@@ -15,5 +15,6 @@ class DatabaseSeeder extends Seeder
     {
         $this->call(AccessSeeder::class);
         $this->call(ContainerSeeder::class);
+        $this->call(FileSeeder::class);
     }
 }

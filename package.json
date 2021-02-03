@@ -1,18 +1,25 @@
 {
-    "private": true,
-    "scripts": {
-        "dev": "npm run development",
-        "development": "mix",
-        "watch": "mix watch",
-        "watch-poll": "mix watch -- --watch-options-poll=1000",
-        "hot": "mix watch --hot",
-        "prod": "npm run production",
-        "production": "mix --production"
-    },
-    "devDependencies": {
-        "axios": "^0.21",
-        "laravel-mix": "^6.0.6",
-        "lodash": "^4.17.19",
-        "postcss": "^8.1.14"
-    }
+  "name": "media-fs",
+  "version": "1.0.0",
+  "description": "OS like media access",
+  "main": "resources/app/app.js",
+  "source": "resources/app/app.html",
+  "scripts": {
+    "dev": "parcel watch resources/app/index.html --out-dir public/app --public-url app"
+  },
+  "author": "Bonoldi Enrico <erribono01@gmail.com> (https://github.com/bonoldie)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/bonoldie/media-fs/issues"
+  },
+  "homepage": "https://github.com/bonoldie/media-fs#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "dotenv": "^8.2.0",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1"
+  },
+  "devDependencies": {
+    "babel-preset-env": "^1.7.0"
+  }
 }

@@ -15,13 +15,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-
+// Container level
 Route::middleware(['access.container'])->group(function($router){
     $router->resource('container',ContainerController::class)->except(['create']);
     
-    $router->middleware(['access.file'])->group(function($router){
-        $router->resource('file',FileController::class)->except(['create']);
-        $router->get('file/download/{file}',FileController::class.'@download');
+    // File level
+    $router->prefix('file')->middleware(['access.file'])->group(function($router){
+        $router->resource('',FileController::class)->except(['create']);
+
+        $router->get('download/{file}',FileController::class.'@download');
     });
 });
 

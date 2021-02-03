@@ -2,8 +2,11 @@
 
 namespace App\Exceptions;
 
+use Exception;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Support\Facades\App;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
@@ -34,17 +37,29 @@ class Handler extends ExceptionHandler
      */
     public function register()
     {
-        $this->renderable(function (UnprocessableEntityHttpException $e){
-            return App::make('helper.response')->fail($e->getMessage(),$e->getStatusCode());
+        $this->renderable(function (HttpException $e) {
+
+            if (empty($e->getMessage())) {
+                switch ($e) {
+                    case $e instanceof NotFoundHttpException:
+                        $message = 'Not found.';
+                        break;
+                    case $e instanceof AccessDeniedHttpException:
+                        $message = 'Forbidden.';
+                        break;
+                    case $e instanceof UnprocessableEntityHttpException:
+                        $message = 'Unprocessable entity.';
+                        break;
+                    default:
+                        $message = 'An error has occurred.';
+                }
+            } else {
+                $message = $e->getMessage();
+            }
+
+            return app('helper.response')->fail($message, $e->getStatusCode());
         });
 
-        $this->renderable(function (MethodNotAllowedHttpException $e){
-            return App::make('helper.response')->fail($e->getMessage(),$e->getStatusCode());
-        });
-
-        $this->renderable(function (NotFoundHttpException $e){
-            return App::make('helper.response')->fail('Not found',$e->getStatusCode());
-        });
 
         $this->reportable(function (Throwable $e) {
             //

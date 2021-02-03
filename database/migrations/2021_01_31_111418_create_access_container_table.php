@@ -15,7 +15,7 @@ class CreateAccessContainerTable extends Migration
     {
         Schema::create('access_container', function (Blueprint $table) {
             $table->uuid('container_id');
-            $table->id('access_id');
+            $table->foreignId('access_id');
 
             $table->foreign('container_id')->references('id')->on('containers');
             $table->foreign('access_id')->references('id')->on('access');

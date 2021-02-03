@@ -13,6 +13,8 @@ class Container extends Model
 
     public $incrementing = false;
 
+    protected $fillable = ['id','name'];
+
     public function access(){
         return $this->belongsToMany(Access::class,'access_container','container_id','access_id');
     }

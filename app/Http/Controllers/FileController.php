@@ -4,103 +4,140 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use Exception;
+use Facade\FlareClient\Http\Exceptions\NotFound;
 use Faker\Provider\Uuid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
 
 class FileController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function index()
     {
         return $this->responseHelper->success(auth()->current_container->files()->get());
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
-        $this->requestHelper->hasFields(['name', 'ext', 'file']);
+        // Validations
+        $this->requestHelper->hasFields(['name', 'type']);
+        $type = $request->get('type');
 
-
-        try {
-            $newFile = File::create(array_merge(
-                $request->only(['name', 'ext']),
-                ['id' => Uuid::uuid(), "container_id" => auth()->current_container->id]
-            ));
-
-            if ($request->has('parent_file_id') && $this->current_container->hasAccessTo($request->get('parent_file_id'))) {
-                $newFile->parent_file_id = $request->get('parent_file_id');
-
-                $newFile->save();
-            }
-        } catch (Exception $e) {
-            return $this->responseHelper->fail($e->getMessage());
+        if (!in_array($type, ['file', 'folder'])) {
+            throw new UnprocessableEntityHttpException("Invalid `type` field.");
         }
 
+        if ($type == 'file' && !$request->has('file')) {
+            throw new UnprocessableEntityHttpException("Invalid `type` field.");
+        }
+
+        // Parent file validation
+        if ($request->has('parent_file_id')) {
+            $parent_file_id = $request->get('parent_file_id');
+
+            // Forbidden parent file
+            if (!auth()->current_container->hasAccessTo($parent_file_id)) {
+                throw new AccessDeniedHttpException("Invalid parent file.");
+            }
+
+            // Non-folder parent file
+            $parent_file = File::findOrFail($parent_file_id);
+            if ($parent_file->type != "folder") {
+                throw new UnprocessableEntityHttpException("Parent file is not a folder.");
+            }
+        }
+
+        // Creation of the new file
+        $new_file_attributes = array_merge(
+            $request->only(['name']),
+            [
+                'id' => Uuid::uuid(),
+                'container_id' => auth()->current_container->id,
+                'type' => $type,
+                'ext' => $request->has('ext'),
+                'parent_file_id' => isset($parent_file) ? $parent_file->id : null
+            ]
+        );
+
         try {
-            if ($request->has('type') && $request->get('type') == 'folder') {
-                // è una cartella quindi non salvo nulla nello storage
-            } else {
+            $new_file = File::create($new_file_attributes);
+        } catch (Exception $e) {
+            throw new HttpException("Error while creating the new file.");
+        }
+
+        // Store the file 
+        if ($type == 'file') {
+            try {
                 Storage::disk('local')->put('files/' . $newFile->id, base64_decode($request->get('file')));
+            } catch (Exception $e) {
+                return new HttpException(500, "File not stored. Reason: " . $e->getMessage());
             }
+        }
+
+        return $this->responseHelper->success($new_file);
+    }
+
+    public function show(string $file_id)
+    {
+        // Validations
+        $file = $this->requestHelper->checkAccessToFile($file_id);
+
+        return $this->responseHelper->success($file);
+    }
+
+    public function update(Request $request, string $file_id)
+    {
+        // Validation
+        $file = $this->requestHelper->checkAccessToFile($file_id);
+
+        $file->update($request->only('name', 'ext'));
+
+        if ($request->has('parent_file_id')) {
+
+            try {
+                $parent_file = $this->requestHelper->checkAccessToFile('parent_file_id');
+
+                if ($parent_file->type == 'folder') {
+                    $file->parent_file_id = $parent_file->id;
+                    $file->save();
+                }
+            } catch (Exception $e) {
+            }
+        }
+
+        return $this->responseHelper->success($file);
+    }
+
+    public function destroy(string $file_id)
+    {
+        // Validation
+        $file = $this->requestHelper->checkAccessToFile($file_id);
+
+        // Soft delete
+        $file->deleted = true;
+
+
+        // Soft delete
+        try {
+            $file->save();
         } catch (Exception $e) {
-            return $this->responseHelper->fail($e->getMessage());
+            throw new UnprocessableEntityHttpException();
         }
 
-        return $this->responseHelper->success(['id' => $newFile->id]);
+        return $this->responseHelper->success('', 'File deleted.');
     }
 
     /**
-     * Display the specified resource.
-     *
-     * @param  \App\Models\File  $file
-     * @return \Illuminate\Http\Response
+     * Return the file download response
      */
-    public function show(string $file)
+    public function download(string $file_id)
     {
-        return $this->responseHelper->success(auth()->current_container->files()->where('id', 'like', $file)->get());
-    }
+        // Validations
+        $file = $this->requestHelper->checkAccessToFile($file_id);
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \App\Models\File  $file
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, File $file)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  \App\Models\File  $file
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy(File $file)
-    {
-        //
-    }
-
-
-    public function download(File $file)
-    {
-        if (auth()->current_container->hasAccessTo($file->id)) {
-            return Storage::disk('local')->download('files/' . $file->id, $file->name . '.' . $file->ext);
-        }
-
-        throw new AccessDeniedHttpException();
+        return Storage::disk('local')->download('files/' . $file->id, $file->name . '.' . $file->ext);
     }
 }
