@@ -11,7 +11,7 @@ export const Navigator = () => {
     return <>
     <div className="row">
         <div className="col-12">
-            <i className="bi bi-arrow-left-square-fill" onClick={() => actions.gotoParent()}></i>
+            <i className="bi bi-arrow-left-square" onClick={() => actions.gotoParent()}></i>
         </div>
     </div>
         <div className="row">

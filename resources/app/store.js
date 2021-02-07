@@ -106,6 +106,18 @@ const gotoParent = (dispatch, state) => () => {
     }
 }
 
+const getFile = (state) => (id) => {
+    const currentFile = state.files.filter(file => file.id === id);
+    if(currentFile.length === 1){
+        return currentFile[0];
+    }
+    return null;
+}
+
+// State utils
+
+//
+
 // Reducer and Provider
 
 const defaultState = {
@@ -159,13 +171,17 @@ export const StoreProvider = ({ children }) => {
     const [state, dispatch] = useReducer(AppReducer, defaultState)
 
     const actions = {
+        // notifications
         notify: notify(dispatch),
         removeNotification: removeNotification(dispatch),
+        // containers
         loadContainers: loadContainers(dispatch),
-        loadFiles: loadFiles(dispatch, state),
         selectContainer: selectContainer(dispatch),
+        // files    
+        loadFiles: loadFiles(dispatch, state),
         selectFile: selectFile(dispatch),
         gotoParent: gotoParent(dispatch, state),
+        getFile: getFile(state)
     }
 
     // For testing purpose
