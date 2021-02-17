@@ -83,13 +83,22 @@ const selectContainer = dispatch => id => {
 }
 
 // Files
+const createFile = (dispatch,state) => (file) => {
+    axios.post(`${process.env.APP_URL}api/file`,{...file,...{container_id:state.selectedContainer}}).then((response) => {
+        notify(dispatch)(successNotification(response.data.message))
+        loadFiles(dispatch,state)()
+    }).catch((error) => {
+        notify(dispatch)(dangerNotification(error.response.data.message));
+    })
+}
+
 const loadFiles = (dispatch, state) => () => {
     if (state.selectedContainer) {
         axios.get(`${process.env.APP_URL}api/file`, { params: { container_id: state.selectedContainer } }).then((response) => {
             dispatch({ type: LOAD_FILES, payload: response.data.data })
-            notify(dispatch)(successNotification('Files loaded'))
+            // notify(dispatch)(successNotification('Files loaded'))
         }).catch(() => {
-            notify(dispatch)(dangerNotification('Cannot load the files.'))
+            // notify(dispatch)(dangerNotification('Cannot load the files.'))
         })
     }
 }
@@ -181,15 +190,16 @@ export const StoreProvider = ({ children }) => {
         loadFiles: loadFiles(dispatch, state),
         selectFile: selectFile(dispatch),
         gotoParent: gotoParent(dispatch, state),
-        getFile: getFile(state)
+        getFile: getFile(state),
+        createFile: createFile(dispatch,state)
     }
 
     // For testing purpose
-    // useEffect(() => {
-    //     console.group('## Store state updated ##')
-    //     console.log(state)
-    //     console.groupEnd();
-    // }, [state])
+    useEffect(() => {
+        console.group('## Store state updated ##')
+        console.log(state)
+        console.groupEnd();
+    }, [state])
 
     window.store = [state, dispatch, actions]
 
