@@ -83,12 +83,23 @@ const selectContainer = dispatch => id => {
 }
 
 // Files
-const createFile = (dispatch,state) => (file) => {
-    axios.post(`${process.env.APP_URL}api/file`,{...file,...{container_id:state.selectedContainer}}).then((response) => {
+
+const deleteFile = (dispatch, state) => (file) => {
+    axios.delete(`${process.env.APP_URL}api/file/${file.file_id}`, { params: { container_id: state.selectedContainer  } }).then((response) => {
         notify(dispatch)(successNotification(response.data.message))
-        loadFiles(dispatch,state)()
+        loadFiles(dispatch, state)()
     }).catch((error) => {
-        notify(dispatch)(dangerNotification(error.response.data.message));
+        notify(dispatch)(dangerNotification(error.response.data.message))
+    })
+}
+
+
+const createFile = (dispatch, state) => (file) => {
+    axios.post(`${process.env.APP_URL}api/file`, { ...file, ...{ container_id: state.selectedContainer } }).then((response) => {
+        notify(dispatch)(successNotification(response.data.message))
+        loadFiles(dispatch, state)()
+    }).catch((error) => {
+        notify(dispatch)(dangerNotification(error.response.data.message))
     })
 }
 
@@ -110,22 +121,19 @@ const selectFile = dispatch => id => {
 
 const gotoParent = (dispatch, state) => () => {
     const currentFile = state.files.filter(file => file.id === state.selectedFile);
-    if(currentFile.length === 1){
+    if (currentFile.length === 1) {
         selectFile(dispatch)(currentFile[0].parent_file_id);
     }
 }
 
 const getFile = (state) => (id) => {
     const currentFile = state.files.filter(file => file.id === id);
-    if(currentFile.length === 1){
+    if (currentFile.length === 1) {
         return currentFile[0];
     }
     return null;
 }
 
-// State utils
-
-//
 
 // Reducer and Provider
 
@@ -191,7 +199,8 @@ export const StoreProvider = ({ children }) => {
         selectFile: selectFile(dispatch),
         gotoParent: gotoParent(dispatch, state),
         getFile: getFile(state),
-        createFile: createFile(dispatch,state)
+        createFile: createFile(dispatch, state),
+        deleteFile: deleteFile(dispatch, state)
     }
 
     // For testing purpose

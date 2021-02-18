@@ -59,6 +59,13 @@ $scale-factor: 1.1;
     }
 }
 
+.buttons-list > i {
+    transition: all 0.3s;
+    &:hover {
+        filter: invert(0.7);
+    }
+}
+
 #main {
     height: 100vh;
 }

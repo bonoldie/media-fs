@@ -1,6 +1,8 @@
 import React, { useContext } from 'react'
 import { AppContext } from '../store'
-
+/**
+ * App notifications
+ */
 export const Notification = () => {
     const [state, actions] = useContext(AppContext);
 

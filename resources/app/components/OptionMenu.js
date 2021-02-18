@@ -5,7 +5,7 @@ import React from 'react'
  */
 export const OptionMenu = () => {
     
-    return <div className="d-fixed" style={{position: 'absolute'}}>
+    return <div className="d-fixed" style={{position: 'absolute' }}>
         
     </div>
 }

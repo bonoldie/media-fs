@@ -16,7 +16,13 @@ export const Main = () => {
     }, [])
 
     return <div className="container-fluid d-flex flex-column" style={{ height: "100%" }}>
-        <Breadcrumb />
+        
+        <div className="row p-3">
+            <div className="col-12  rounded-3 bg-gray" >
+                <Breadcrumb />
+            </div>
+        </div>
+
         <Navigator />
         <OptionMenu />
     </div>

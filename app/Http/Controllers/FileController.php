@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\File;
 use Exception;
-use Facade\FlareClient\Http\Exceptions\NotFound;
 use Faker\Provider\Uuid;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -35,7 +34,7 @@ class FileController extends Controller
         }
 
         // Parent file validation
-        if ($request->has('parent_file_id')) {
+        if (!empty($request->get('parent_file_id'))) {
             $parent_file_id = $request->get('parent_file_id');
 
             // Forbidden parent file
@@ -118,7 +117,6 @@ class FileController extends Controller
 
         // Soft delete
         $file->deleted = true;
-
 
         // Soft delete
         try {
