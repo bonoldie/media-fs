@@ -59,10 +59,30 @@ $scale-factor: 1.1;
     }
 }
 
+// lists
+
+.file-list > .list-group-item.file-list-item {
+    transition: all 0.3s;
+    &:hover {
+        filter: contrast(0.9);
+    }
+}
 .buttons-list > i {
     transition: all 0.3s;
     &:hover {
         filter: invert(0.7);
+    }
+}
+
+// Dropzone
+.drop-file-item {
+    transition: all 0.3s;
+    opacity: 0;
+    background-color: #cfe2ff;
+    color: blue;
+    
+    &.drop-file-item-highlight {
+        opacity: 1;
     }
 }
 
