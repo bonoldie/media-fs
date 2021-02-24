@@ -70,7 +70,7 @@ class FileController extends Controller
         // Store the file 
         if ($type == 'file') {
             try {
-                Storage::disk('local')->put('files/' . $newFile->id, base64_decode($request->get('file')));
+                Storage::disk('local')->put('files/' . $new_file->id, $request->get('file'));
             } catch (Exception $e) {
                 return new HttpException(500, "File not stored. Reason: " . $e->getMessage());
             }

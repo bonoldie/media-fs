@@ -12,7 +12,7 @@ export const Navigator = () => {
         <div className="p-0 col-sm-12 col-md-3 col-lg-3">
             <ContainerList />
         </div>
-        <div className={`p-0 col-sm-12 col-md-8 col-lg-8 offset-md-1 offset-lg-1 `}>
+        <div className={`p-0 col-sm-12 col-md-8 col-lg-8 offset-md-1 offset-lg-1 d-flex`}>
             <FileList />
         </div>
     </div>

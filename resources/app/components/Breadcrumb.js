@@ -23,9 +23,9 @@ export const Breadcrumb = () => {
         <ol className="breadcrumb">
             <Divider />
             {
-                files.reverse().map((file, index, files) => <Fragment>
+                files.reverse().map((file, index, files) => <Fragment  key={file.id}>
                     {index !== 0 ? <Divider /> : null}
-                    <li className={`breadcrumb-item ${files.length - 1 === index ? ' active ' : ' '}`} key={file.id}><a onClick={() => actions.selectFile(file.id)}>{file.name}</a></li>
+                    <li className={`breadcrumb-item ${files.length - 1 === index ? ' active ' : ' '}`}><a onClick={() => actions.selectFile(file.id)}>{file.name}</a></li>
                 </Fragment>
                 )
             }
