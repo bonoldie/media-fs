@@ -118,7 +118,6 @@ const deleteFile = (dispatch, state) => (file) => {
     })
 }
 
-
 const createFile = (dispatch, state) => (file) => {
     dispatch({ type: CREATE_FILE })
 
@@ -128,6 +127,19 @@ const createFile = (dispatch, state) => (file) => {
         loadFiles(dispatch, state)()
     }).catch((error) => {
         dispatch({ type: CREATE_FILE_ERROR, payload: error.response.data })
+        notify(dispatch)(dangerNotification(error.response.data.message))
+    })
+}
+
+const updateFile = (dispatch, state) => (file) => {
+    dispatch({ type: UPDATE_FILE })
+
+    axios.put(`${process.env.APP_URL}api/file/${file.id}`, { ...file, ...{ container_id: state.selectedContainer } }).then((response) => {
+        dispatch({ type: UPDATE_FILE_SUCCESS, payload: response.data })
+        // notify(dispatch)(successNotification(response.data.message))
+        loadFiles(dispatch, state)()
+    }).catch((error) => {
+        dispatch({ type: UPDATE_FILE_ERROR, payload: error.response.data })
         notify(dispatch)(dangerNotification(error.response.data.message))
     })
 }
@@ -270,7 +282,8 @@ export const StoreProvider = ({ children }) => {
         gotoParent: gotoParent(dispatch, state),
         getFile: getFile(state),
         createFile: createFile(dispatch, state),
-        deleteFile: deleteFile(dispatch, state)
+        deleteFile: deleteFile(dispatch, state),
+        updateFile: updateFile(dispatch,state)
     }
 
     // Testing purpose

@@ -39,6 +39,7 @@ export const FileList = () => {
     // File upload (drag&drop)
     const handleDragOver = (e) => {
         showDropzone(true)
+
         e.dataTransfer.dropEffect = "copy"
 
         e.preventDefault()
@@ -63,6 +64,27 @@ export const FileList = () => {
         showDropzone(false)
     }
 
+    const handleDeleteFile = (file) => (e) => {
+        e.stopPropagation()
+        let really = confirm('Sure ?')
+        if (really)
+            actions.deleteFile({ file_id: file.id })
+    }
+
+    const handleEditFile = (file) => (e) => {
+        // TODO
+    }
+
+    const handleFileDragStart = (file) => (e) => {
+        e.dataTransfer.dropEffect = "move"
+        e.dataTransfer.setData('text/plain', (file.id))
+    }
+
+    const handleFileDrop = (file) => (e) => {
+        actions.updateFile({ id: e.dataTransfer.getData("text/plain"), parent_file_id: file.id })
+    }
+
+
     return <div onDrop={storeDropFile} onDragOver={handleDragOver} onDragLeave={() => showDropzone(false)} className="col-12 h-100 d-flex flex-column">
         <ul className="list-group list-group-flush rounded-3 ">
             <li className="list-group-item bg-gray">
@@ -75,8 +97,20 @@ export const FileList = () => {
                 </div>
 
             </li >
+            { /* GoRoot item */}
+            <li className={`list-group-item bg-gray  file-list-item ${state.selectedFile ? '' : ' disabled '}`} key={'goto_root'} onClick={() => actions.selectFile()}>
+                <i className='bi bi-house'></i>
+                <Divider plain={true} />
+            ...
+        </li>
+            { /* GoBack item */}
+            <li className={`list-group-item bg-gray  file-list-item ${state.selectedFile ? '' : ' disabled '}`} key={'goto_parent'} onClick={() => actions.gotoParent()}>
+                <i className='bi bi-arrow-left-square'></i>
+                <Divider plain={true} />
+            ..
+        </li>
         </ul>
-        <ul className="list-group list-group-flush file-list">
+        <ul className={"list-group list-group-flush file-list scroll-anim"} >
 
             <li className={`list-group-item bg-gray p-4 ${showAddFolder ? '' : ' d-none '}`}>
                 < label htmlFor="newFolderName" className="form-label" > folder name</label >
@@ -91,36 +125,17 @@ export const FileList = () => {
             </li >
 
 
-
-            { /* GoRoot item */}
-            <li className={`list-group-item bg-gray  file-list-item ${state.selectedFile ? '' : ' disabled '}`} key={'goto_root'} onClick={() => actions.selectFile()}>
-                <i className='bi bi-house'></i>
-                <Divider plain={true} />
-            ...
-        </li>
-            { /* GoBack item */}
-            <li className={`list-group-item bg-gray  file-list-item ${state.selectedFile ? '' : ' disabled '}`} key={'goto_parent'} onClick={() => actions.gotoParent()}>
-                <i className='bi bi-arrow-left-square'></i>
-                <Divider plain={true} />
-            ..
-        </li>
-
             {
                 // Render file 
                 state.files && state.files.filter(file => file.parent_file_id == state.selectedFile).map(file =>
-                    <li className="list-group-item bg-gray file-list-item" key={file.id} onClick={() => actions.selectFile(file.id)}>
+                    <li className="list-group-item bg-gray file-list-item" key={file.id} onClick={() => actions.selectFile(file.id)} onDragStart={handleFileDragStart(file)} draggable onDrop={handleFileDrop(file)}>
                         <i className={`bi bi-${file.type}`}></i>
                         <Divider plain={true} />
                         {file.name}
                         <div className="buttons-list d-inline float-end">
-                            <i className="bi bi-pencil-square"></i>
+                            <i className="bi bi-pencil-square" onClick={handleEditFile(file)} ></i>
                             <Divider plain={true} />
-                            <i className="bi bi-trash" onClick={(e) => {
-                                e.stopPropagation()
-                                let really = confirm('Delete `' + file.name + '`?')
-                                if (really)
-                                    actions.deleteFile({ file_id: file.id })
-                            }}></i>
+                            <i className="bi bi-trash" onClick={handleDeleteFile(file)}></i>
                         </div>
                     </li>
                 )

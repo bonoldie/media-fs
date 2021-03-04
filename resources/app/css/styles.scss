@@ -58,10 +58,23 @@ $scale-factor: 1.1;
         }
     }
 }
+// Lists scroll and animations
+
+.scroll-anim {
+    &::-webkit-scrollbar {
+        background-color: white;
+        width: 3px;
+        padding: 10px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background-color: grey;
+    }
+}
 
 // lists
-
 .file-list {
+    height: 50vh;
     overflow-x: hidden;
     overflow-y: scroll;
     flex-grow: 1;

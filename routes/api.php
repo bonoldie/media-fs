@@ -21,9 +21,10 @@ Route::middleware(['access.container'])->group(function($router){
     
     // File level
     $router->prefix('file')->middleware(['access.file'])->group(function($router){
-        $router->resource('',FileController::class)->except(['create','destroy']);
+        $router->resource('',FileController::class)->except(['create','destroy','update']);
         $router->get('download/{file}',FileController::class.'@download');
         
+        $router->put('{file_id}',FileController::class.'@update');
         // WORKAROUND TO MAKE CONTROLLER NOT BUILD THE MODEL
         $router->delete('{file_id}',FileController::class.'@destroy');
     });

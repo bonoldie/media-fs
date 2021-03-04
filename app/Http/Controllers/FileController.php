@@ -87,7 +87,7 @@ class FileController extends Controller
         return $this->responseHelper->success($file);
     }
 
-    public function update(Request $request, string $file_id)
+    public function update(Request $request, $file_id)
     {
         // Validation
         $file = $this->requestHelper->checkAccessToFile($file_id);
@@ -95,15 +95,15 @@ class FileController extends Controller
         $file->update($request->only('name', 'ext'));
 
         if ($request->has('parent_file_id')) {
+            $parent_file = $this->requestHelper->checkAccessToFile($request->get('parent_file_id'));
 
-            try {
-                $parent_file = $this->requestHelper->checkAccessToFile('parent_file_id');
-
-                if ($parent_file->type == 'folder') {
+            if ($parent_file->type == 'folder') {
+                try {
                     $file->parent_file_id = $parent_file->id;
                     $file->save();
+                } catch (Exception $e) {
+                    throw new UnprocessableEntityHttpException();
                 }
-            } catch (Exception $e) {
             }
         }
 
